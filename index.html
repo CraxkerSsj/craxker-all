@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Nossa Galeria</title>
   <style>
     body {
@@ -42,87 +42,93 @@
 </head>
 <body>
   <h1>Bem-vinda ao nosso site, amor!</h1>
-  <p>Este site é dedicado a fotos nossas juntos!</p>
+  <p>Este site é dedicado a fotos nossas o juntos!</p>
 
-  <h1>Galeria de Fotos</h1>
+  <h2>Galeria de Fotos</h2>
   <input type="file" id="fileInput" accept="image/*" multiple />
   <button id="uploadButton">Upload</button>
   <div class="gallery" id="gallery"></div>
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+  <!-- Firebase SDK -->
+<script type="module">
+  // 1. Importações do Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCY9aqdROj-ipxuoHPnOxarz3qavjzcqVM",
-      authDomain: "galeria-craxker.firebaseapp.com",
-      databaseURL: "https://galeria-craxker-default-rtdb.firebaseio.com",
-      projectId: "galeria-craxker",
-      storageBucket: "galeria-craxker.appspot.com",
-      messagingSenderId: "1087205348610",
-      appId: "1:1087205348610:web:9863598498371a9b40de1b"
+  // 2. Configuração do Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyCY9aqdROj-ipxuoHPnOxarz3qavjzcqVM",
+    authDomain: "galeria-craxker.firebaseapp.com",
+    databaseURL: "https://galeria-craxker-default-rtdb.firebaseio.com",
+    projectId: "galeria-craxker",
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const imagesRef = ref(db, "images");
+
+  // 3. Elementos do HTML
+  const fileInput = document.getElementById("fileInput");
+  const uploadButton = document.getElementById("uploadButton");
+  const gallery = document.getElementById("gallery");
+
+  // 4. Dados do Cloudinary
+  const cloudName = "dc3zdtwio";
+  const uploadPreset = "ml_default";
+
+  // 5. Função para adicionar imagem
+  function addImageToGallery(key, url) {
+    const container = document.createElement("div");
+    container.classList.add("image-container");
+
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = "Imagem";
+
+    const removeBtn = document.createElement("button");
+    removeBtn.classList.add("remove-button");
+    removeBtn.textContent = "Remover";
+
+    removeBtn.onclick = () => {
+      remove(ref(db, `images/${key}`));
+      container.remove();
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const imagesRef = ref(db, "images");
+    container.appendChild(img);
+    container.appendChild(removeBtn);
+    gallery.appendChild(container);
+  }
 
-    const fileInput = document.getElementById("fileInput");
-    const uploadButton = document.getElementById("uploadButton");
-    const gallery = document.getElementById("gallery");
-
-    function addImageToGallery(key, src) {
-      const imageContainer = document.createElement("div");
-      imageContainer.classList.add("image-container");
-
-      const img = document.createElement("img");
-      img.src = src;
-      img.alt = "Imagem enviada";
-
-      const removeButton = document.createElement("button");
-      removeButton.classList.add("remove-button");
-      removeButton.textContent = "Remover";
-
-      removeButton.addEventListener("click", () => {
-        remove(ref(db, "images/" + key));
-        imageContainer.remove();
+  // 6. Carrega imagens salvas do Firebase
+  onValue(imagesRef, (snapshot) => {
+    gallery.innerHTML = "";
+    const data = snapshot.val();
+    if (data) {
+      Object.entries(data).forEach(([key, url]) => {
+        addImageToGallery(key, url);
       });
-
-      imageContainer.appendChild(img);
-      imageContainer.appendChild(removeButton);
-      gallery.appendChild(imageContainer);
     }
+  });
 
-    uploadButton.addEventListener("click", async () => {
-      const files = fileInput.files;
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", "ml_default");
+  // 7. Upload para o Cloudinary
+  uploadButton.onclick = async () => {
+    const files = fileInput.files;
+    for (let file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", uploadPreset);
 
-        const res = await fetch("https://api.cloudinary.com/v1_1/dc3zdtwio/image/upload", {
-          method: "POST",
-          body: formData
-        });
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      const imageUrl = data.secure_url;
 
-        const data = await res.json();
-        const imageUrl = data.secure_url;
+      // Salva no Firebase
+      push(imagesRef, imageUrl);
+    }
+  };
+</script>
 
-        push(imagesRef, imageUrl);
-      }
-    });
-
-    onValue(imagesRef, snapshot => {
-      gallery.innerHTML = "";
-      const data = snapshot.val();
-      if (data) {
-        Object.entries(data).forEach(([key, url]) => {
-          addImageToGallery(key, url);
-        });
-      }
-    });
-  </script>
 </body>
 </html>
