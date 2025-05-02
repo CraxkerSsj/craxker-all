@@ -39,14 +39,10 @@
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 transition" />
       </div>
 
-      <div class="flex justify-between items-center">
+      <div>
         <button id="loginBtn"
-          class="bg-pink-500 text-white font-medium px-4 py-2 rounded-lg hover:bg-pink-600 transition w-full mr-2">
+          class="bg-pink-500 text-white font-medium px-4 py-2 rounded-lg hover:bg-pink-600 transition w-full">
           Entrar
-        </button>
-        <button id="registerBtn"
-          class="text-sm text-pink-600 hover:underline transition w-full ml-2">
-          Criar Conta
         </button>
       </div>
     </div>
@@ -82,7 +78,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCp_dRGikNmZH76rNzVgRE9o_XyU_v5zYA",
@@ -101,7 +97,6 @@
     const email = document.getElementById("email");
     const password = document.getElementById("password");
     const loginBtn = document.getElementById("loginBtn");
-    const registerBtn = document.getElementById("registerBtn");
     const logoutBtn = document.getElementById("logoutBtn");
     const categorySelect = document.getElementById("categorySelect");
 
@@ -114,11 +109,6 @@
     loginBtn.onclick = () => {
       signInWithEmailAndPassword(auth, email.value, password.value)
         .catch(err => alert("Erro ao entrar: " + err.message));
-    };
-
-    registerBtn.onclick = () => {
-      createUserWithEmailAndPassword(auth, email.value, password.value)
-        .catch(err => alert("Erro ao cadastrar: " + err.message));
     };
 
     logoutBtn.onclick = () => {
