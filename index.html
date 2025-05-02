@@ -1,15 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR" class="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nossa Galeria</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class'
-    }
-  </script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <style>
     .fade-in {
@@ -23,52 +18,73 @@
       transform: scale(1.05);
       transition: transform 0.3s ease;
     }
+
+    /* DARK MODE */
+    .dark body {
+      background-color: #1a1a1a;
+      color: #f4f4f4;
+    }
+    .dark .bg-white {
+      background-color: #2a2a2a;
+    }
+    .dark input, .dark select {
+      background-color: #333;
+      color: #fff;
+      border-color: #555;
+    }
+    .dark .text-gray-700 {
+      color: #ccc;
+    }
   </style>
 </head>
-<body class="bg-gradient-to-br from-pink-100 to-pink-300 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100 font-sans">
+<body class="bg-pink-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-300">
 
-  <!-- TEMA SWITCH -->
-  <div class="absolute top-4 right-4">
-    <button id="themeToggle" class="px-3 py-1 bg-gray-300 dark:bg-gray-700 text-sm rounded">Alternar Tema</button>
+  <!-- TEMA CLARO/ESCURO -->
+  <div class="absolute top-4 right-4 z-50">
+    <button id="toggleDark" class="px-3 py-1 rounded bg-gray-800 text-white dark:bg-gray-200 dark:text-black">
+      🌙/☀️
+    </button>
   </div>
 
   <!-- TELA DE LOGIN -->
   <div class="min-h-screen flex items-center justify-center fade-in" id="authContainer">
-    <div class="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-xl w-full max-w-sm">
-      <h2 class="text-2xl font-bold text-center text-pink-600 dark:text-pink-400 mb-6">💖 Bem-vindos à Galeria 💖</h2>
-
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-sm">
+      <h2 class="text-2xl font-bold text-center text-pink-600 mb-6">💖 Bem-vindos à Galeria 💖</h2>
+      
       <div class="mb-4">
-        <label class="block text-sm font-medium mb-1">Email</label>
+        <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Email</label>
         <input type="email" id="email" placeholder="seu@email.com"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600" />
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 transition" />
       </div>
 
       <div class="mb-6">
-        <label class="block text-sm font-medium mb-1">Senha</label>
+        <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Senha</label>
         <input type="password" id="password" placeholder="********"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600" />
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 transition" />
       </div>
 
-      <button id="loginBtn"
-        class="bg-pink-500 text-white font-medium px-4 py-2 rounded-lg hover:bg-pink-600 w-full">
-        Entrar
-      </button>
+      <div class="flex justify-between items-center">
+        <button id="loginBtn"
+          class="bg-pink-500 text-white font-medium px-4 py-2 rounded-lg hover:bg-pink-600 transition w-full">
+          Entrar
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- CONTEÚDO PRINCIPAL (galeria) -->
+  <!-- CONTEÚDO PRINCIPAL -->
   <div class="max-w-4xl mx-auto p-4 hidden" id="mainContent">
     <div class="flex justify-between items-center mb-4">
       <div>
         <label for="categorySelect" class="mr-2">Categoria:</label>
-        <select id="categorySelect" class="border px-2 py-1 rounded dark:bg-gray-800 dark:border-gray-600">
+        <select id="categorySelect" class="border px-2 py-1 rounded">
           <option value="geral">Geral</option>
           <option value="viagem">Viagem</option>
           <option value="familia">Família</option>
           <option value="pets">Pets</option>
         </select>
       </div>
-      <button id="logoutBtn" class="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600">Sair</button>
+      <button id="logoutBtn" class="bg-gray-300 dark:bg-gray-700 text-black dark:text-white px-3 py-1 rounded hover:bg-gray-400">Sair</button>
     </div>
 
     <h1 class="text-3xl font-bold mb-2 text-center fade-in">Oie, amor 💖</h1>
@@ -76,9 +92,11 @@
 
     <div class="flex flex-col items-center gap-2 mb-4 fade-in">
       <input type="file" id="fileInput" accept="image/*" multiple class="mb-2" />
-      <div id="preview" class="flex gap-2 flex-wrap"></div>
-      <progress id="uploadProgress" value="0" max="100" class="w-full mb-2 hidden"></progress>
-      <button id="uploadButton" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">Enviar Fotos</button>
+      <div id="previewContainer" class="flex gap-2 flex-wrap mb-2"></div>
+      <div class="w-full bg-gray-300 rounded-full h-2 overflow-hidden">
+        <div id="progressBar" class="bg-pink-500 h-full w-0 transition-all duration-300"></div>
+      </div>
+      <button id="uploadButton" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 transition">Enviar Fotos</button>
     </div>
 
     <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
@@ -114,8 +132,8 @@
     const fileInput = document.getElementById("fileInput");
     const uploadButton = document.getElementById("uploadButton");
     const gallery = document.getElementById("gallery");
-    const preview = document.getElementById("preview");
-    const progressBar = document.getElementById("uploadProgress");
+    const progressBar = document.getElementById("progressBar");
+    const previewContainer = document.getElementById("previewContainer");
 
     loginBtn.onclick = () => {
       signInWithEmailAndPassword(auth, email.value, password.value)
@@ -143,14 +161,14 @@
     const uploadPreset = "galeria_upload";
 
     fileInput.addEventListener("change", () => {
-      preview.innerHTML = "";
+      previewContainer.innerHTML = "";
       [...fileInput.files].forEach(file => {
         const reader = new FileReader();
         reader.onload = e => {
           const img = document.createElement("img");
           img.src = e.target.result;
-          img.className = "w-20 h-20 object-cover rounded";
-          preview.appendChild(img);
+          img.className = "w-20 h-20 object-cover rounded shadow";
+          previewContainer.appendChild(img);
         };
         reader.readAsDataURL(file);
       });
@@ -160,10 +178,6 @@
       const files = fileInput.files;
       if (!files.length) return;
       const categoria = categorySelect.value;
-
-      progressBar.classList.remove("hidden");
-      progressBar.value = 0;
-
       let completed = 0;
 
       [...files].forEach(file => {
@@ -172,9 +186,9 @@
         formData.append("upload_preset", uploadPreset);
 
         axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, formData, {
-          onUploadProgress: event => {
-            const percent = Math.round((event.loaded * 100) / event.total);
-            progressBar.value = percent;
+          onUploadProgress: progressEvent => {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            progressBar.style.width = `${percent}%`;
           }
         })
         .then(res => {
@@ -182,9 +196,9 @@
           push(ref(db, `galeria/${categoria}`), imageUrl);
           completed++;
           if (completed === files.length) {
-            progressBar.classList.add("hidden");
             fileInput.value = "";
-            preview.innerHTML = "";
+            previewContainer.innerHTML = "";
+            progressBar.style.width = "0%";
             loadImages();
           }
         })
@@ -195,7 +209,6 @@
     function loadImages() {
       const categoria = categorySelect.value;
       const galleryRef = ref(db, `galeria/${categoria}`);
-
       onValue(galleryRef, snapshot => {
         gallery.innerHTML = "";
         const data = snapshot.val();
@@ -211,7 +224,7 @@
             const btn = document.createElement("button");
             btn.textContent = "Remover";
             btn.className = "absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-sm rounded hidden group-hover:block";
-            btn.onclick = () => remove(ref(db, `galeria/${categoria}/` + key));
+            btn.onclick = () => remove(ref(db, `galeria/${categoria}/${key}`));
 
             container.appendChild(img);
             container.appendChild(btn);
@@ -221,9 +234,10 @@
       });
     }
 
-    document.getElementById("themeToggle").addEventListener("click", () => {
+    // 🌙 Toggle Dark Mode
+    document.getElementById("toggleDark").onclick = () => {
       document.documentElement.classList.toggle("dark");
-    });
+    };
   </script>
 </body>
 </html>
