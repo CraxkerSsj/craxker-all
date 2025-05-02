@@ -1,42 +1,92 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="light">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Galeria de Fotos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nossa Galeria</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <style>
+    :root {
+      --bg-light: #ffe4ec;
+      --bg-dark: #a774fc;
+      --text-light: #333;
+      --text-dark: #fff;
+      --input-bg-light: white;
+      --input-bg-dark: #333;
+      --btn-bg-light: #f9f9f9;
+      --btn-bg-dark: #a35eff;
+      --btn-text-light: #333;
+      --btn-text-dark: #fff;
+      --card-bg-light: #fff;
+      --card-bg-dark: #2b2b2b;
+    }
+
+    html[data-theme="light"] {
+      background-color: var(--bg-light);
+      color: var(--text-light);
+    }
+
+    html[data-theme="dark"] {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
     body {
-      transition: background-color 0.5s ease, color 0.5s ease;
+      background-color: inherit;
+      color: inherit;
+      transition: background-color 0.4s, color 0.4s;
     }
 
-    [data-theme="light"] body {
-      background-color: #f4f0ff;
-      color: #222;
+    input, select {
+      background-color: var(--input-bg-light);
+      color: var(--text-light);
     }
 
-    [data-theme="dark"] body {
-      background-color: #1a1a2e;
-      color: #f1f1f1;
+    html[data-theme="dark"] input,
+    html[data-theme="dark"] select {
+      background-color: var(--input-bg-dark);
+      color: var(--text-dark);
+      border-color: #555;
+    }
+
+    .theme-card {
+      background-color: var(--card-bg-light);
+      color: var(--text-light);
+    }
+
+    html[data-theme="dark"] .theme-card {
+      background-color: var(--card-bg-dark);
+      color: var(--text-dark);
     }
 
     .theme-btn {
-      background-color: #a35eff;
-      color: white;
-    }
-
-    .theme-btn:hover {
-      opacity: 0.9;
+      background-color: var(--btn-bg-light);
+      color: var(--btn-text-light);
     }
 
     html[data-theme="dark"] .theme-btn {
-      background-color: #ff94d4;
-      color: #222;
+      background-color: var(--btn-bg-dark);
+      color: var(--btn-text-dark);
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .zoom-hover:hover {
+      transform: scale(1.05);
+      transition: transform 0.3s ease;
     }
 
     .progress-bar {
       height: 6px;
-      background-color: #e0d0ff;
+      background-color: #a35eff;
       border-radius: 9999px;
       overflow: hidden;
       margin-top: 4px;
@@ -44,150 +94,247 @@
 
     .progress-fill {
       height: 100%;
-      background-color: #a35eff;
+      background-color: #fff;
       width: 0%;
       transition: width 0.3s ease;
     }
 
-    html[data-theme="dark"] .progress-bar {
-      background-color: #5a335d;
+    .preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
-    html[data-theme="dark"] .progress-fill {
-      background-color: #ff94d4;
+    .preview-container img {
+      height: 100px;
+      border-radius: 8px;
+      object-fit: cover;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
     }
   </style>
 </head>
-<body class="min-h-screen p-4">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-bold">Galeria de Fotos</h1>
-    <div class="space-x-2">
-      <button id="logoutBtn" class="theme-btn px-4 py-2 rounded">Sair</button>
-      <button id="toggleTheme" class="theme-btn px-4 py-2 rounded">🌙</button>
+<body class="font-sans">
+
+  <div class="absolute top-4 right-4 z-50">
+    <button id="toggleTheme" class="theme-btn px-3 py-1 rounded shadow hover:opacity-90 transition">
+      🌙
+    </button>
+  </div>
+
+  <div class="min-h-screen flex items-center justify-center fade-in" id="authContainer">
+    <div class="theme-card p-8 rounded-2xl shadow-xl w-full max-w-sm">
+      <h2 class="text-2xl font-bold text-center mb-6">💖 Bem-vindos à Galeria 💖</h2>
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Email</label>
+        <input type="email" id="email" placeholder="seu@email.com"
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 transition" />
+      </div>
+      <div class="mb-6">
+        <label class="block text-sm font-medium mb-1">Senha</label>
+        <input type="password" id="password" placeholder="********"
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 transition" />
+      </div>
+      <div>
+        <button id="loginBtn" class="theme-btn font-medium px-4 py-2 rounded-lg transition w-full">
+          Entrar
+        </button>
+      </div>
     </div>
   </div>
 
-  <div class="mb-6 space-y-4">
-    <input type="file" id="fileInput" accept="image/*" class="block" />
-    <img id="preview" src="" alt="Prévia da imagem" class="max-w-xs rounded shadow hidden" />
-    <div class="progress-bar w-full max-w-md">
-      <div class="progress-fill"></div>
+  <div class="max-w-4xl mx-auto p-4 hidden" id="mainContent">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <label for="categorySelect" class="mr-2">Categoria:</label>
+        <select id="categorySelect" class="border px-2 py-1 rounded"></select>
+      </div>
+      <button id="logoutBtn" class="theme-btn px-3 py-1 rounded hover:opacity-90">Sair</button>
     </div>
-    <button id="uploadBtn" class="theme-btn px-4 py-2 rounded">Enviar Foto</button>
-  </div>
 
-  <div id="gallery" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+    <h1 class="text-3xl font-bold mb-2 text-center fade-in">Oie, amor 💖</h1>
+    <p class="text-center mb-6 fade-in">Nossa galeria de fotos</p>
+
+    <div class="flex flex-col items-center gap-2 mb-4 fade-in">
+      <input type="file" id="fileInput" accept="image/*" multiple class="mb-2" />
+      <div id="preview" class="preview-container"></div>
+      <button id="uploadButton" class="theme-btn px-4 py-2 rounded transition">Enviar Fotos</button>
+    </div>
+
+    <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+  </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import {
-      getDatabase,
-      ref,
-      onValue,
-      push
-    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCp_dRGikNmZH76rNzVgRE9o_XyU_v5zYA",
-      authDomain: "galeria-craxker.firebaseapp.com",
-      databaseURL: "https://galeria-craxker-default-rtdb.firebaseio.com",
-      projectId: "galeria-craxker",
-      storageBucket: "galeria-craxker.appspot.com",
-      messagingSenderId: "1023234018969",
-      appId: "1:1023234018969:web:51cb6be370e59bb50e4e10"
+      authDomain: "keen-zenith-458520-f7.firebaseapp.com",
+      databaseURL: "https://keen-zenith-458520-f7-default-rtdb.firebaseio.com",
+      projectId: "keen-zenith-458520-f7",
+      storageBucket: "keen-zenith-458520-f7.firebasestorage.app",
+      messagingSenderId: "995877491702",
+      appId: "1:995877491702:web:35d39ef0bafd36b4046dd7"
     };
 
     const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
     const auth = getAuth(app);
-    const database = getDatabase(app);
 
-    const fileInput = document.getElementById("fileInput");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const preview = document.getElementById("preview");
-    const gallery = document.getElementById("gallery");
-    const progressFill = document.querySelector(".progress-fill");
+    const email = document.getElementById("email");
+    const password = document.getElementById("password");
+    const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
-    const toggleTheme = document.getElementById("toggleTheme");
+    const categorySelect = document.getElementById("categorySelect");
 
-    // Prévia da imagem
-    fileInput.addEventListener("change", () => {
-      const file = fileInput.files[0];
-      if (file) {
-        preview.src = URL.createObjectURL(file);
-        preview.classList.remove("hidden");
+    const authContainer = document.getElementById("authContainer");
+    const mainContent = document.getElementById("mainContent");
+    const fileInput = document.getElementById("fileInput");
+    const uploadButton = document.getElementById("uploadButton");
+    const gallery = document.getElementById("gallery");
+    const preview = document.getElementById("preview");
+
+    loginBtn.onclick = () => {
+      signInWithEmailAndPassword(auth, email.value, password.value)
+        .catch(err => alert("Erro ao entrar: " + err.message));
+    };
+
+    logoutBtn.onclick = () => {
+      signOut(auth).catch(err => alert("Erro ao sair: " + err.message));
+    };
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        authContainer.classList.add("hidden");
+        mainContent.classList.remove("hidden");
+        loadImages();
       } else {
-        preview.src = "";
-        preview.classList.add("hidden");
+        authContainer.classList.remove("hidden");
+        mainContent.classList.add("hidden");
       }
     });
 
-    // Upload para Cloudinary e salvar link no Firebase
-    uploadBtn.addEventListener("click", async () => {
-      const file = fileInput.files[0];
-      if (!file) return alert("Selecione uma imagem");
+    categorySelect.innerHTML = `
+      <option value="geral">Geral</option>
+      <option value="viagem">Viagem</option>
+      <option value="familia">Família</option>
+      <option value="pets">Pets</option>
+    `;
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "ml_default");
+    categorySelect.onchange = loadImages;
 
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "https://api.cloudinary.com/v1_1/dc3zdtwio/image/upload", true);
+    const cloudName = "dc3zdtwio";
+    const uploadPreset = "galeria_upload";
 
-      xhr.upload.onprogress = (e) => {
-        const percent = Math.round((e.loaded / e.total) * 100);
-        progressFill.style.width = percent + "%";
-      };
-
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          const data = JSON.parse(xhr.responseText);
-          const imageUrl = data.secure_url;
-          push(ref(database, "fotos"), imageUrl);
-          fileInput.value = "";
-          preview.classList.add("hidden");
-          progressFill.style.width = "0%";
-        } else {
-          alert("Erro no upload");
-        }
-      };
-
-      xhr.onerror = () => alert("Erro de conexão");
-      xhr.send(formData);
-    });
-
-    // Mostrar galeria
-    onValue(ref(database, "fotos"), (snapshot) => {
-      gallery.innerHTML = "";
-      snapshot.forEach((child) => {
-        const img = document.createElement("img");
-        img.src = child.val();
-        img.className = "w-full rounded shadow";
-        gallery.appendChild(img);
+    fileInput.addEventListener("change", () => {
+      preview.innerHTML = "";
+      [...fileInput.files].forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
       });
     });
 
-    // Autenticação
-    onAuthStateChanged(auth, (user) => {
-      if (!user) window.location.href = "login.html";
+    uploadButton.addEventListener("click", () => {
+      const files = fileInput.files;
+      if (!files.length) return;
+      const categoria = categorySelect.value;
+
+      [...files].forEach(file => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", uploadPreset);
+
+        const container = document.createElement("div");
+        container.className = "w-full max-w-xs mx-auto mb-2";
+
+        const progressBar = document.createElement("div");
+        progressBar.className = "progress-bar";
+
+        const progressFill = document.createElement("div");
+        progressFill.className = "progress-fill";
+        progressBar.appendChild(progressFill);
+        container.appendChild(progressBar);
+        preview.appendChild(container);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloudName}/upload`, true);
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const percent = (e.loaded / e.total) * 100;
+            progressFill.style.width = `${percent}%`;
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const res = JSON.parse(xhr.responseText);
+            push(ref(db, `galeria/${categoria}`), res.secure_url);
+            loadImages();
+          } else {
+            alert("Erro ao enviar imagem");
+          }
+        };
+
+        xhr.onerror = () => alert("Erro ao enviar imagem");
+        xhr.send(formData);
+      });
+
+      fileInput.value = "";
+      preview.innerHTML = "";
     });
 
-    logoutBtn.addEventListener("click", () => {
-      signOut(auth);
-    });
+    function loadImages() {
+      const categoria = categorySelect.value;
+      const galleryRef = ref(db, `galeria/${categoria}`);
 
-    // Alternar tema claro/escuro
-    toggleTheme.addEventListener("click", () => {
-      const html = document.documentElement;
-      const current = html.getAttribute("data-theme");
-      const next = current === "dark" ? "light" : "dark";
-      html.setAttribute("data-theme", next);
-      toggleTheme.textContent = next === "dark" ? "☀️" : "🌙";
-    });
+      onValue(galleryRef, snapshot => {
+        gallery.innerHTML = "";
+        const data = snapshot.val();
+        if (data) {
+          Object.entries(data).forEach(([key, url]) => {
+            const container = document.createElement("div");
+            container.className = "relative group overflow-hidden rounded shadow-md zoom-hover fade-in theme-card";
+
+            const img = document.createElement("img");
+            img.src = url;
+            img.className = "w-full h-auto";
+
+            const btn = document.createElement("button");
+            btn.textContent = "Remover";
+            btn.className = "absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-sm rounded hidden group-hover:block";
+            btn.onclick = () => remove(ref(db, `galeria/${categoria}/` + key));
+
+            container.appendChild(img);
+            container.appendChild(btn);
+            gallery.appendChild(container);
+          });
+        }
+      });
+    }
+
+    const toggleThemeBtn = document.getElementById("toggleTheme");
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
+      toggleThemeBtn.textContent = theme === "dark" ? "☀️" : "🌙";
+    }
+
+    const savedTheme = localStorage.getItem("theme") || "light";
+    applyTheme(savedTheme);
+
+    toggleThemeBtn.onclick = () => {
+      const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      applyTheme(newTheme);
+    };
   </script>
 </body>
 </html>
