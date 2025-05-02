@@ -61,12 +61,15 @@
     import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCY9aqdROj-ipxuoHPnOxarz3qavjzcqVM",
-      authDomain: "galeria-craxker.firebaseapp.com",
-      databaseURL: "https://galeria-craxker-default-rtdb.firebaseio.com",
-      projectId: "galeria-craxker"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyCp_dRGikNmZH76rNzVgRE9o_XyU_v5zYA",
+    authDomain: "keen-zenith-458520-f7.firebaseapp.com",
+    databaseURL: "https://keen-zenith-458520-f7-default-rtdb.firebaseio.com",
+    projectId: "keen-zenith-458520-f7",
+    storageBucket: "keen-zenith-458520-f7.firebasestorage.app",
+    messagingSenderId: "995877491702",
+    appId: "1:995877491702:web:35d39ef0bafd36b4046dd7"
+  };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
