@@ -83,6 +83,35 @@
       transform: scale(1.05);
       transition: transform 0.3s ease;
     }
+
+    .progress-bar {
+      height: 6px;
+      background-color: #a35eff;
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: #fff;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .preview-container img {
+      height: 100px;
+      border-radius: 8px;
+      object-fit: cover;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+    }
   </style>
 </head>
 <body class="font-sans">
@@ -128,6 +157,7 @@
 
     <div class="flex flex-col items-center gap-2 mb-4 fade-in">
       <input type="file" id="fileInput" accept="image/*" multiple class="mb-2" />
+      <div id="preview" class="preview-container"></div>
       <button id="uploadButton" class="theme-btn px-4 py-2 rounded transition">Enviar Fotos</button>
     </div>
 
@@ -164,6 +194,7 @@
     const fileInput = document.getElementById("fileInput");
     const uploadButton = document.getElementById("uploadButton");
     const gallery = document.getElementById("gallery");
+    const preview = document.getElementById("preview");
 
     loginBtn.onclick = () => {
       signInWithEmailAndPassword(auth, email.value, password.value)
@@ -197,6 +228,19 @@
     const cloudName = "dc3zdtwio";
     const uploadPreset = "galeria_upload";
 
+    fileInput.addEventListener("change", () => {
+      preview.innerHTML = "";
+      [...fileInput.files].forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
     uploadButton.addEventListener("click", () => {
       const files = fileInput.files;
       if (!files.length) return;
@@ -207,14 +251,44 @@
         formData.append("file", file);
         formData.append("upload_preset", uploadPreset);
 
-        axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, formData)
-          .then(res => {
-            const imageUrl = res.data.secure_url;
-            push(ref(db, `galeria/${categoria}`), imageUrl);
+        const container = document.createElement("div");
+        container.className = "w-full max-w-xs mx-auto mb-2";
+
+        const progressBar = document.createElement("div");
+        progressBar.className = "progress-bar";
+
+        const progressFill = document.createElement("div");
+        progressFill.className = "progress-fill";
+        progressBar.appendChild(progressFill);
+        container.appendChild(progressBar);
+        preview.appendChild(container);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloudName}/upload`, true);
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const percent = (e.loaded / e.total) * 100;
+            progressFill.style.width = `${percent}%`;
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const res = JSON.parse(xhr.responseText);
+            push(ref(db, `galeria/${categoria}`), res.secure_url);
             loadImages();
-          })
-          .catch(() => alert("Erro ao enviar imagem"));
+          } else {
+            alert("Erro ao enviar imagem");
+          }
+        };
+
+        xhr.onerror = () => alert("Erro ao enviar imagem");
+        xhr.send(formData);
       });
+
+      fileInput.value = "";
+      preview.innerHTML = "";
     });
 
     function loadImages() {
