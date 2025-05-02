@@ -6,31 +6,23 @@
   <title>Galeria Amor</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <style>
-    .fade-in {
-      animation: fadeIn 0.6s ease-in;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-  </style>
 </head>
-<body class="bg-gradient-to-br from-pink-100 to-purple-200 text-gray-800 font-sans min-h-screen">
+<body class="bg-gray-100 text-gray-800 font-sans">
   <div class="max-w-4xl mx-auto p-4">
-    <h1 class="text-4xl font-bold mb-2 text-center animate-bounce">Bem-vinda, amor 💖</h1>
-    <p class="text-center mb-6 text-lg italic">Nossa galeria de fotos lindas ✨</p>
+    <h1 class="text-3xl font-bold mb-2 text-center">Bem-vinda, amor 💖</h1>
+    <p class="text-center mb-6">Nossa galeria de fotos</p>
 
-    <div class="flex flex-col items-center gap-2 mb-6" id="authArea">
-      <input type="email" id="email" placeholder="Email" class="border p-2 rounded w-full max-w-xs" />
-      <input type="password" id="password" placeholder="Senha" class="border p-2 rounded w-full max-w-xs" />
-      <div class="flex gap-2">
-        <button id="loginBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Entrar</button>
-        <button id="logoutBtn" class="bg-gray-600 text-white px-4 py-2 rounded hidden">Sair</button>
+    <div class="max-w-md mx-auto mb-6 text-center">
+      <input id="email" type="email" placeholder="Email" class="mb-2 w-full p-2 border rounded" />
+      <input id="senha" type="password" placeholder="Senha" class="mb-2 w-full p-2 border rounded" />
+      <div class="flex gap-2 justify-center">
+        <button id="btnCadastro" class="bg-green-500 text-white px-4 py-2 rounded">Cadastrar</button>
+        <button id="btnLogin" class="bg-blue-500 text-white px-4 py-2 rounded">Entrar</button>
+        <button id="btnLogout" class="bg-gray-600 text-white px-4 py-2 rounded hidden">Sair</button>
       </div>
     </div>
 
-    <div class="flex flex-col items-center gap-2 mb-6" id="uploadArea" style="display: none;">
+    <div class="flex flex-col items-center gap-2 mb-4">
       <input type="file" id="fileInput" accept="image/*" multiple class="mb-2" />
       <button id="uploadButton" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 transition">Enviar Fotos</button>
     </div>
@@ -40,8 +32,20 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      onValue,
+      remove
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCY9aqdROj-ipxuoHPnOxarz3qavjzcqVM",
@@ -51,39 +55,47 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
     const auth = getAuth(app);
+    const db = getDatabase(app);
     const galleryRef = ref(db, "galeria");
 
     const cloudName = "dc3zdtwio";
     const uploadPreset = "galeria_upload";
 
+    const emailInput = document.getElementById("email");
+    const senhaInput = document.getElementById("senha");
+    const btnCadastro = document.getElementById("btnCadastro");
+    const btnLogin = document.getElementById("btnLogin");
+    const btnLogout = document.getElementById("btnLogout");
     const fileInput = document.getElementById("fileInput");
     const uploadButton = document.getElementById("uploadButton");
     const gallery = document.getElementById("gallery");
-    const uploadArea = document.getElementById("uploadArea");
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
 
-    loginBtn.onclick = () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      signInWithEmailAndPassword(auth, email, password)
-        .catch(err => alert("Erro ao entrar: " + err.message));
-    };
+    btnCadastro.addEventListener("click", () => {
+      const email = emailInput.value;
+      const senha = senhaInput.value;
+      createUserWithEmailAndPassword(auth, email, senha)
+        .then(() => alert("Cadastro feito com sucesso!"))
+        .catch(err => alert("Erro ao cadastrar: " + err.message));
+    });
 
-    logoutBtn.onclick = () => signOut(auth);
+    btnLogin.addEventListener("click", () => {
+      const email = emailInput.value;
+      const senha = senhaInput.value;
+      signInWithEmailAndPassword(auth, email, senha)
+        .then(() => alert("Login feito com sucesso!"))
+        .catch(err => alert("Erro ao logar: " + err.message));
+    });
+
+    btnLogout.addEventListener("click", () => {
+      signOut(auth).then(() => alert("Você saiu!"));
+    });
 
     onAuthStateChanged(auth, user => {
-      if (user) {
-        uploadArea.style.display = "flex";
-        logoutBtn.classList.remove("hidden");
-        loginBtn.classList.add("hidden");
-      } else {
-        uploadArea.style.display = "none";
-        logoutBtn.classList.add("hidden");
-        loginBtn.classList.remove("hidden");
-      }
+      const isLogged = !!user;
+      btnLogout.classList.toggle("hidden", !isLogged);
+      uploadButton.disabled = !isLogged;
+      fileInput.disabled = !isLogged;
     });
 
     uploadButton.addEventListener("click", () => {
@@ -96,7 +108,10 @@
         formData.append("upload_preset", uploadPreset);
 
         axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, formData)
-          .then(res => push(galleryRef, res.data.secure_url))
+          .then(res => {
+            const imageUrl = res.data.secure_url;
+            push(galleryRef, imageUrl);
+          })
           .catch(err => alert("Erro ao enviar imagem"));
       });
     });
@@ -107,7 +122,7 @@
       if (data) {
         Object.entries(data).forEach(([key, url]) => {
           const container = document.createElement("div");
-          container.className = "relative group overflow-hidden rounded shadow-md hover:scale-105 transition-transform fade-in";
+          container.className = "relative group overflow-hidden rounded shadow-md hover:scale-105 transition-transform";
 
           const img = document.createElement("img");
           img.src = url;
@@ -116,11 +131,7 @@
           const btn = document.createElement("button");
           btn.textContent = "Remover";
           btn.className = "absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-sm rounded hidden group-hover:block";
-          btn.onclick = () => {
-            const user = auth.currentUser;
-            if (user) remove(ref(db, "galeria/" + key));
-            else alert("Apenas usuários logados podem remover.");
-          };
+          btn.onclick = () => remove(ref(db, "galeria/" + key));
 
           container.appendChild(img);
           container.appendChild(btn);
