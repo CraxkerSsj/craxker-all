@@ -6,52 +6,48 @@
   <title>Galeria Amor</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <style>
+    .fade-in {
+      animation: fadeIn 0.6s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans">
+<body class="bg-gradient-to-br from-pink-100 to-purple-200 text-gray-800 font-sans min-h-screen">
   <div class="max-w-4xl mx-auto p-4">
-    <h1 class="text-3xl font-bold mb-2 text-center">Bem-vinda, amor 💖</h1>
-    <p class="text-center mb-6">Nossa galeria de fotos</p>
+    <h1 class="text-4xl font-bold mb-2 text-center animate-bounce">Bem-vinda, amor 💖</h1>
+    <p class="text-center mb-6 text-lg italic">Nossa galeria de fotos lindas ✨</p>
 
-    <!-- Login / Cadastro -->
-    <div id="authSection" class="mb-6 text-center">
-      <input type="email" id="email" placeholder="Email" class="p-2 border rounded mb-2 w-64" /><br />
-      <input type="password" id="password" placeholder="Senha" class="p-2 border rounded mb-2 w-64" /><br />
-      <button id="signupBtn" class="bg-green-500 text-white px-4 py-2 rounded mr-2">Cadastrar</button>
-      <button id="loginBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Entrar</button>
-      <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded mt-2 hidden">Sair</button>
-    </div>
-
-    <!-- Upload e galeria -->
-    <div id="uploadSection" class="hidden">
-      <div class="flex flex-col items-center gap-2 mb-4">
-        <input type="file" id="fileInput" accept="image/*" multiple class="mb-2" />
-        <button id="uploadButton" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 transition">Enviar Fotos</button>
+    <div class="flex flex-col items-center gap-2 mb-6" id="authArea">
+      <input type="email" id="email" placeholder="Email" class="border p-2 rounded w-full max-w-xs" />
+      <input type="password" id="password" placeholder="Senha" class="border p-2 rounded w-full max-w-xs" />
+      <div class="flex gap-2">
+        <button id="loginBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Entrar</button>
+        <button id="logoutBtn" class="bg-gray-600 text-white px-4 py-2 rounded hidden">Sair</button>
       </div>
-
-      <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
     </div>
+
+    <div class="flex flex-col items-center gap-2 mb-6" id="uploadArea" style="display: none;">
+      <input type="file" id="fileInput" accept="image/*" multiple class="mb-2" />
+      <button id="uploadButton" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 transition">Enviar Fotos</button>
+    </div>
+
+    <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    // Firebase config segura (com restrições)
     const firebaseConfig = {
       apiKey: "AIzaSyCY9aqdROj-ipxuoHPnOxarz3qavjzcqVM",
       authDomain: "galeria-craxker.firebaseapp.com",
       databaseURL: "https://galeria-craxker-default-rtdb.firebaseio.com",
-      projectId: "galeria-craxker",
-      storageBucket: "galeria-craxker.appspot.com",
-      messagingSenderId: "1087205348610",
-      appId: "1:1087205348610:web:9863598498371a9b40de1b"
+      projectId: "galeria-craxker"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -65,46 +61,31 @@
     const fileInput = document.getElementById("fileInput");
     const uploadButton = document.getElementById("uploadButton");
     const gallery = document.getElementById("gallery");
-    const uploadSection = document.getElementById("uploadSection");
-
-    const emailEl = document.getElementById("email");
-    const passwordEl = document.getElementById("password");
-    const signupBtn = document.getElementById("signupBtn");
+    const uploadArea = document.getElementById("uploadArea");
     const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
 
-    // Autenticação
-    signupBtn.addEventListener("click", () => {
-      createUserWithEmailAndPassword(auth, emailEl.value, passwordEl.value)
-        .then(() => alert("Usuário criado!"))
-        .catch(e => alert("Erro ao cadastrar: " + e.message));
-    });
+    loginBtn.onclick = () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      signInWithEmailAndPassword(auth, email, password)
+        .catch(err => alert("Erro ao entrar: " + err.message));
+    };
 
-    loginBtn.addEventListener("click", () => {
-      signInWithEmailAndPassword(auth, emailEl.value, passwordEl.value)
-        .then(() => alert("Login realizado!"))
-        .catch(e => alert("Erro ao entrar: " + e.message));
-    });
-
-    logoutBtn.addEventListener("click", () => {
-      signOut(auth);
-    });
+    logoutBtn.onclick = () => signOut(auth);
 
     onAuthStateChanged(auth, user => {
       if (user) {
-        uploadSection.classList.remove("hidden");
+        uploadArea.style.display = "flex";
         logoutBtn.classList.remove("hidden");
-        signupBtn.disabled = loginBtn.disabled = true;
-        mostrarImagens();
+        loginBtn.classList.add("hidden");
       } else {
-        uploadSection.classList.add("hidden");
+        uploadArea.style.display = "none";
         logoutBtn.classList.add("hidden");
-        signupBtn.disabled = loginBtn.disabled = false;
-        gallery.innerHTML = "";
+        loginBtn.classList.remove("hidden");
       }
     });
 
-    // Upload para Cloudinary
     uploadButton.addEventListener("click", () => {
       const files = fileInput.files;
       if (!files.length) return;
@@ -115,40 +96,38 @@
         formData.append("upload_preset", uploadPreset);
 
         axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, formData)
-          .then(res => {
-            const imageUrl = res.data.secure_url;
-            push(galleryRef, imageUrl);
-          })
+          .then(res => push(galleryRef, res.data.secure_url))
           .catch(err => alert("Erro ao enviar imagem"));
       });
     });
 
-    // Mostrar imagens
-    function mostrarImagens() {
-      onValue(galleryRef, snapshot => {
-        gallery.innerHTML = "";
-        const data = snapshot.val();
-        if (data) {
-          Object.entries(data).forEach(([key, url]) => {
-            const container = document.createElement("div");
-            container.className = "relative group overflow-hidden rounded shadow-md hover:scale-105 transition-transform";
+    onValue(galleryRef, snapshot => {
+      gallery.innerHTML = "";
+      const data = snapshot.val();
+      if (data) {
+        Object.entries(data).forEach(([key, url]) => {
+          const container = document.createElement("div");
+          container.className = "relative group overflow-hidden rounded shadow-md hover:scale-105 transition-transform fade-in";
 
-            const img = document.createElement("img");
-            img.src = url;
-            img.className = "w-full h-auto";
+          const img = document.createElement("img");
+          img.src = url;
+          img.className = "w-full h-auto";
 
-            const btn = document.createElement("button");
-            btn.textContent = "Remover";
-            btn.className = "absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-sm rounded hidden group-hover:block";
-            btn.onclick = () => remove(ref(db, "galeria/" + key));
+          const btn = document.createElement("button");
+          btn.textContent = "Remover";
+          btn.className = "absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-sm rounded hidden group-hover:block";
+          btn.onclick = () => {
+            const user = auth.currentUser;
+            if (user) remove(ref(db, "galeria/" + key));
+            else alert("Apenas usuários logados podem remover.");
+          };
 
-            container.appendChild(img);
-            container.appendChild(btn);
-            gallery.appendChild(container);
-          });
-        }
-      });
-    }
+          container.appendChild(img);
+          container.appendChild(btn);
+          gallery.appendChild(container);
+        });
+      }
+    });
   </script>
 </body>
 </html>
