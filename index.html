@@ -204,6 +204,18 @@
         .catch(err => alert("Erro ao entrar: " + err.message));
     };
 
+    import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+    document.getElementById("forgotPassword").onclick = () => {
+      const emailAddress = prompt("Digite seu email para redefinir a senha:");
+      if (emailAddress) {
+        sendPasswordResetEmail(auth, emailAddress)
+          .then(() => alert("Email de redefinição enviado! Verifique sua caixa de entrada."))
+          .catch(error => alert("Erro: " + error.message));
+      }
+    };
+
+
     logoutBtn.onclick = () => {
       signOut(auth).catch(err => alert("Erro ao sair: " + err.message));
     };
