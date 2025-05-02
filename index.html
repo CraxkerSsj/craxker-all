@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nossa Galeria</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <style>
     .fade-in {
@@ -18,55 +23,36 @@
       transform: scale(1.05);
       transition: transform 0.3s ease;
     }
-    .dark body {
-      background-color: #1a202c;
-      color: #f7fafc;
-    }
-    .dark .bg-white {
-      background-color: #2d3748;
-    }
-    .dark input,
-    .dark select {
-      background-color: #4a5568;
-      border-color: #718096;
-      color: white;
-    }
-    .dark button {
-      background-color: #805ad5;
-    }
-    .dark .text-gray-700 {
-      color: #e2e8f0;
-    }
   </style>
 </head>
-<body class="bg-gradient-to-br from-pink-100 to-pink-300 text-gray-800 font-sans" id="body">
+<body class="bg-gradient-to-br from-pink-100 to-pink-300 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100 font-sans">
 
-  <!-- TEMA -->
-  <button id="toggleTheme" class="absolute top-4 right-4 bg-gray-200 px-3 py-1 rounded">🌙</button>
+  <!-- TEMA SWITCH -->
+  <div class="absolute top-4 right-4">
+    <button id="themeToggle" class="px-3 py-1 bg-gray-300 dark:bg-gray-700 text-sm rounded">Alternar Tema</button>
+  </div>
 
-  <!-- TELA DE LOGIN BONITA -->
+  <!-- TELA DE LOGIN -->
   <div class="min-h-screen flex items-center justify-center fade-in" id="authContainer">
-    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm">
-      <h2 class="text-2xl font-bold text-center text-pink-600 mb-6">💖 Bem-vindos à Galeria 💖</h2>
+    <div class="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-xl w-full max-w-sm">
+      <h2 class="text-2xl font-bold text-center text-pink-600 dark:text-pink-400 mb-6">💖 Bem-vindos à Galeria 💖</h2>
 
       <div class="mb-4">
-        <label class="block text-sm font-medium mb-1 text-gray-700">Email</label>
+        <label class="block text-sm font-medium mb-1">Email</label>
         <input type="email" id="email" placeholder="seu@email.com"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 transition" />
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600" />
       </div>
 
       <div class="mb-6">
-        <label class="block text-sm font-medium mb-1 text-gray-700">Senha</label>
+        <label class="block text-sm font-medium mb-1">Senha</label>
         <input type="password" id="password" placeholder="********"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 transition" />
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600" />
       </div>
 
-      <div class="flex justify-between items-center">
-        <button id="loginBtn"
-          class="bg-pink-500 text-white font-medium px-4 py-2 rounded-lg hover:bg-pink-600 transition w-full">
-          Entrar
-        </button>
-      </div>
+      <button id="loginBtn"
+        class="bg-pink-500 text-white font-medium px-4 py-2 rounded-lg hover:bg-pink-600 w-full">
+        Entrar
+      </button>
     </div>
   </div>
 
@@ -75,14 +61,14 @@
     <div class="flex justify-between items-center mb-4">
       <div>
         <label for="categorySelect" class="mr-2">Categoria:</label>
-        <select id="categorySelect" class="border px-2 py-1 rounded">
+        <select id="categorySelect" class="border px-2 py-1 rounded dark:bg-gray-800 dark:border-gray-600">
           <option value="geral">Geral</option>
           <option value="viagem">Viagem</option>
           <option value="familia">Família</option>
           <option value="pets">Pets</option>
         </select>
       </div>
-      <button id="logoutBtn" class="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400">Sair</button>
+      <button id="logoutBtn" class="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600">Sair</button>
     </div>
 
     <h1 class="text-3xl font-bold mb-2 text-center fade-in">Oie, amor 💖</h1>
@@ -90,9 +76,9 @@
 
     <div class="flex flex-col items-center gap-2 mb-4 fade-in">
       <input type="file" id="fileInput" accept="image/*" multiple class="mb-2" />
-      <div id="preview" class="flex flex-wrap gap-2"></div>
-      <progress id="progressBar" value="0" max="100" class="w-full hidden"></progress>
-      <button id="uploadButton" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 transition">Enviar Fotos</button>
+      <div id="preview" class="flex gap-2 flex-wrap"></div>
+      <progress id="uploadProgress" value="0" max="100" class="w-full mb-2 hidden"></progress>
+      <button id="uploadButton" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">Enviar Fotos</button>
     </div>
 
     <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
@@ -109,7 +95,7 @@
       authDomain: "keen-zenith-458520-f7.firebaseapp.com",
       databaseURL: "https://keen-zenith-458520-f7-default-rtdb.firebaseio.com",
       projectId: "keen-zenith-458520-f7",
-      storageBucket: "keen-zenith-458520-f7.firebasestorage.app",
+      storageBucket: "keen-zenith-458520-f7.appspot.com",
       messagingSenderId: "995877491702",
       appId: "1:995877491702:web:35d39ef0bafd36b4046dd7"
     };
@@ -123,14 +109,13 @@
     const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
     const categorySelect = document.getElementById("categorySelect");
-
     const authContainer = document.getElementById("authContainer");
     const mainContent = document.getElementById("mainContent");
     const fileInput = document.getElementById("fileInput");
     const uploadButton = document.getElementById("uploadButton");
     const gallery = document.getElementById("gallery");
-    const progressBar = document.getElementById("progressBar");
     const preview = document.getElementById("preview");
+    const progressBar = document.getElementById("uploadProgress");
 
     loginBtn.onclick = () => {
       signInWithEmailAndPassword(auth, email.value, password.value)
@@ -160,10 +145,14 @@
     fileInput.addEventListener("change", () => {
       preview.innerHTML = "";
       [...fileInput.files].forEach(file => {
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(file);
-        img.className = "w-20 h-20 object-cover rounded border";
-        preview.appendChild(img);
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          img.className = "w-20 h-20 object-cover rounded";
+          preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
       });
     });
 
@@ -171,7 +160,10 @@
       const files = fileInput.files;
       if (!files.length) return;
       const categoria = categorySelect.value;
+
       progressBar.classList.remove("hidden");
+      progressBar.value = 0;
+
       let completed = 0;
 
       [...files].forEach(file => {
@@ -180,8 +172,8 @@
         formData.append("upload_preset", uploadPreset);
 
         axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, formData, {
-          onUploadProgress: e => {
-            const percent = Math.round((e.loaded * 100) / e.total);
+          onUploadProgress: event => {
+            const percent = Math.round((event.loaded * 100) / event.total);
             progressBar.value = percent;
           }
         })
@@ -229,9 +221,7 @@
       });
     }
 
-    // Alternar tema escuro
-    const toggleTheme = document.getElementById("toggleTheme");
-    toggleTheme.addEventListener("click", () => {
+    document.getElementById("themeToggle").addEventListener("click", () => {
       document.documentElement.classList.toggle("dark");
     });
   </script>
