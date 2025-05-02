@@ -18,6 +18,10 @@
       transform: scale(1.05);
       transition: transform 0.3s ease;
     }
+    .dark body {
+      background-color: #1f2937;
+      color: #f3f4f6;
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-pink-100 to-pink-300 text-gray-800 font-sans">
@@ -26,7 +30,7 @@
   <div class="min-h-screen flex items-center justify-center fade-in" id="authContainer">
     <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm">
       <h2 class="text-2xl font-bold text-center text-pink-600 mb-6">💖 Bem-vindos à Galeria 💖</h2>
-      
+
       <div class="mb-4">
         <label class="block text-sm font-medium mb-1 text-gray-700">Email</label>
         <input type="email" id="email" placeholder="seu@email.com"
@@ -39,7 +43,12 @@
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 transition" />
       </div>
 
-      <div>
+      <div class="mb-4 flex items-center">
+        <input type="checkbox" id="rememberMe" class="mr-2">
+        <label for="rememberMe" class="text-sm text-gray-700">Lembrar-me</label>
+      </div>
+
+      <div class="flex justify-between items-center">
         <button id="loginBtn"
           class="bg-pink-500 text-white font-medium px-4 py-2 rounded-lg hover:bg-pink-600 transition w-full">
           Entrar
@@ -60,7 +69,12 @@
           <option value="pets">Pets</option>
         </select>
       </div>
-      <button id="logoutBtn" class="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400">Sair</button>
+      <div class="flex items-center">
+        <button id="themeToggle" class="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800 ml-2">
+          Alternar Tema
+        </button>
+        <button id="logoutBtn" class="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400 ml-2">Sair</button>
+      </div>
     </div>
 
     <h1 class="text-3xl font-bold mb-2 text-center fade-in">Oie, amor 💖</h1>
@@ -78,7 +92,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCp_dRGikNmZH76rNzVgRE9o_XyU_v5zYA",
@@ -99,6 +113,8 @@
     const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
     const categorySelect = document.getElementById("categorySelect");
+    const rememberMe = document.getElementById("rememberMe");
+    const themeToggle = document.getElementById("themeToggle");
 
     const authContainer = document.getElementById("authContainer");
     const mainContent = document.getElementById("mainContent");
@@ -106,8 +122,21 @@
     const uploadButton = document.getElementById("uploadButton");
     const gallery = document.getElementById("gallery");
 
+    // Tema salvo
+    if (localStorage.getItem("theme") === "dark") {
+      document.documentElement.classList.add("dark");
+    }
+
+    themeToggle.onclick = () => {
+      document.documentElement.classList.toggle("dark");
+      const isDark = document.documentElement.classList.contains("dark");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    };
+
     loginBtn.onclick = () => {
-      signInWithEmailAndPassword(auth, email.value, password.value)
+      const persistence = rememberMe.checked ? browserLocalPersistence : browserSessionPersistence;
+      setPersistence(auth, persistence)
+        .then(() => signInWithEmailAndPassword(auth, email.value, password.value))
         .catch(err => alert("Erro ao entrar: " + err.message));
     };
 
