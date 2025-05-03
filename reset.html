@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Redefinir Senha</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #f3e8ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 class="text-2xl font-bold mb-4 text-center">🔒 Recuperar Senha</h2>
+    <p class="mb-4 text-sm text-gray-600 text-center">Informe seu email para receber um link de redefinição.</p>
+    <input id="email" type="email" placeholder="seu@email.com" class="w-full mb-4 px-4 py-2 border rounded" />
+    <button id="resetBtn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded">Enviar link</button>
+    <p id="msg" class="text-sm mt-4 text-center"></p>
+  </div>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCp_dRGikNmZH76rNzVgRE9o_XyU_v5zYA",
+      authDomain: "keen-zenith-458520-f7.firebaseapp.com",
+      projectId: "keen-zenith-458520-f7",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const emailInput = document.getElementById("email");
+    const resetBtn = document.getElementById("resetBtn");
+    const msg = document.getElementById("msg");
+
+    resetBtn.onclick = async () => {
+      const email = emailInput.value.trim();
+      if (!email) {
+        msg.textContent = "Digite um email válido.";
+        msg.style.color = "red";
+        return;
+      }
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        msg.textContent = "Email de redefinição enviado com sucesso!";
+        msg.style.color = "green";
+      } catch (error) {
+        msg.textContent = "Erro: " + error.message;
+        msg.style.color = "red";
+      }
+    };
+  </script>
+</body>
+</html>
