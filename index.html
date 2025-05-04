@@ -154,10 +154,10 @@
       <button id="playMusicBtn" class="bg-pink-500 text-white px-4 py-2 rounded-lg shadow hover:bg-pink-600 transition">
         🎵 Tocar Música
       </button>
-      <audio id="bgMusic" loop>
-        <source src="videoplayback (1).weba" type="audio/mpeg">
-        Seu navegador não suporta áudio.
-      </audio>
+        <audio id="bgMusic" loop>
+          <source src="videoplayback (1).weba" type="audio/webm" />
+          Seu navegador não suporta áudio.
+        </audio>
     </div>
     
     <div class="flex justify-between items-center mb-4">
@@ -180,210 +180,208 @@
     <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCp_dRGikNmZH76rNzVgRE9o_XyU_v5zYA",
-      authDomain: "keen-zenith-458520-f7.firebaseapp.com",
-      databaseURL: "https://keen-zenith-458520-f7-default-rtdb.firebaseio.com",
-      projectId: "keen-zenith-458520-f7",
-      storageBucket: "keen-zenith-458520-f7.firebasestorage.app",
-      messagingSenderId: "995877491702",
-      appId: "1:995877491702:web:35d39ef0bafd36b4046dd7"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyCp_dRGikNmZH76rNzVgRE9o_XyU_v5zYA",
+    authDomain: "keen-zenith-458520-f7.firebaseapp.com",
+    databaseURL: "https://keen-zenith-458520-f7-default-rtdb.firebaseio.com",
+    projectId: "keen-zenith-458520-f7",
+    storageBucket: "keen-zenith-458520-f7.firebasestorage.app",
+    messagingSenderId: "995877491702",
+    appId: "1:995877491702:web:35d39ef0bafd36b4046dd7"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
 
-    const email = document.getElementById("email");
-    const password = document.getElementById("password");
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const categorySelect = document.getElementById("categorySelect");
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const categorySelect = document.getElementById("categorySelect");
 
-    const authContainer = document.getElementById("authContainer");
-    const mainContent = document.getElementById("mainContent");
-    const fileInput = document.getElementById("fileInput");
-    const uploadButton = document.getElementById("uploadButton");
-    const gallery = document.getElementById("gallery");
-    const preview = document.getElementById("preview");
+  const authContainer = document.getElementById("authContainer");
+  const mainContent = document.getElementById("mainContent");
+  const fileInput = document.getElementById("fileInput");
+  const uploadButton = document.getElementById("uploadButton");
+  const gallery = document.getElementById("gallery");
+  const preview = document.getElementById("preview");
 
-    loginBtn.onclick = () => {
-      signInWithEmailAndPassword(auth, email.value, password.value)
-        .catch(err => alert("Erro ao entrar: " + err.message));
-    };
+  const playMusicBtn = document.getElementById("playMusicBtn");
+  const bgMusic = document.getElementById("bgMusic");
 
+  // Botão para tocar a música
+  playMusicBtn?.addEventListener("click", () => {
+    bgMusic.play();
+    playMusicBtn.textContent = "🔊 Música Tocando...";
+    playMusicBtn.disabled = true;
+  });
 
-    const playMusicBtn = document.getElementById("playMusicBtn");
-    const bgMusic = document.getElementById("bgMusic");
-
-    playMusicBtn?.addEventListener("click", () => {
-      bgMusic.play();
-      playMusicBtn.textContent = "🔊 Música Tocando...";
-      playMusicBtn.disabled = true;
-    });
-
-    // Reproduzir música automaticamente ao mostrar a galeria
-    const mainContent = document.getElementById("mainContent");
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.target.style.display !== "none") {
-          bgMusic.play();
-          playMusicBtn.textContent = "🔊 Música Tocando...";
-          playMusicBtn.disabled = true;
-        }
-      });
-    });
-
-    
-    observer.observe(mainContent, { attributes: true, attributeFilter: ['style'] });
-
-    logoutBtn.onclick = () => {
-      signOut(auth).catch(err => alert("Erro ao sair: " + err.message));
-    };
-
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        authContainer.classList.add("hidden");
-        mainContent.classList.remove("hidden");
-        loadImages();
-      } else {
-        authContainer.classList.remove("hidden");
-        mainContent.classList.add("hidden");
+  // Toca a música automaticamente quando a galeria aparece
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (!mainContent.classList.contains("hidden")) {
+        bgMusic.play();
+        playMusicBtn.textContent = "🔊 Música Tocando...";
+        playMusicBtn.disabled = true;
       }
     });
+  });
 
-    categorySelect.innerHTML = `
-      <option value="geral">Geral</option>
-      <option value="viagem">Viagem</option>
-      <option value="familia">Família</option>
-      <option value="pets">Pets</option>
-    `;
+  observer.observe(mainContent, { attributes: true, attributeFilter: ['class'] });
 
-    categorySelect.onchange = loadImages;
+  loginBtn.onclick = () => {
+    signInWithEmailAndPassword(auth, email.value, password.value)
+      .catch(err => alert("Erro ao entrar: " + err.message));
+  };
 
-    const cloudName = "dc3zdtwio";
-    const uploadPreset = "galeria_upload";
+  logoutBtn.onclick = () => {
+    signOut(auth).catch(err => alert("Erro ao sair: " + err.message));
+  };
 
-    fileInput.addEventListener("change", () => {
-      preview.innerHTML = "";
-      [...fileInput.files].forEach(file => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = document.createElement("img");
-          img.src = e.target.result;
-          preview.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-      });
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      authContainer.classList.add("hidden");
+      mainContent.classList.remove("hidden");
+      loadImages();
+    } else {
+      authContainer.classList.remove("hidden");
+      mainContent.classList.add("hidden");
+    }
+  });
+
+  categorySelect.innerHTML = `
+    <option value="geral">Geral</option>
+    <option value="viagem">Viagem</option>
+    <option value="familia">Família</option>
+    <option value="pets">Pets</option>
+  `;
+
+  categorySelect.onchange = loadImages;
+
+  const cloudName = "dc3zdtwio";
+  const uploadPreset = "galeria_upload";
+
+  fileInput.addEventListener("change", () => {
+    preview.innerHTML = "";
+    [...fileInput.files].forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
     });
+  });
 
-    uploadButton.addEventListener("click", () => {
-      const files = fileInput.files;
-      if (!files.length) return;
-      const categoria = categorySelect.value;
+  uploadButton.addEventListener("click", () => {
+    const files = fileInput.files;
+    if (!files.length) return;
+    const categoria = categorySelect.value;
 
-      preview.innerHTML = "";
+    preview.innerHTML = "";
 
-      [...files].forEach(file => {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", uploadPreset);
+    [...files].forEach(file => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", uploadPreset);
 
-        const container = document.createElement("div");
-        container.className = "w-full max-w-xs mx-auto mb-2";
+      const container = document.createElement("div");
+      container.className = "w-full max-w-xs mx-auto mb-2";
 
-        const previewImage = document.createElement("img");
-        previewImage.src = URL.createObjectURL(file);
-        previewImage.className = "mb-1 rounded shadow";
-        container.appendChild(previewImage);
+      const previewImage = document.createElement("img");
+      previewImage.src = URL.createObjectURL(file);
+      previewImage.className = "mb-1 rounded shadow";
+      container.appendChild(previewImage);
 
-        const progressBar = document.createElement("div");
-        progressBar.className = "progress-bar";
+      const progressBar = document.createElement("div");
+      progressBar.className = "progress-bar";
 
-        const progressFill = document.createElement("div");
-        progressFill.className = "progress-fill";
-        progressBar.appendChild(progressFill);
-        container.appendChild(progressBar);
+      const progressFill = document.createElement("div");
+      progressFill.className = "progress-fill";
+      progressBar.appendChild(progressFill);
+      container.appendChild(progressBar);
 
-        preview.appendChild(container);
+      preview.appendChild(container);
 
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloudName}/upload`, true);
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloudName}/upload`, true);
 
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) {
-            const percent = (e.loaded / e.total) * 100;
-            progressFill.style.width = `${percent}%`;
-          }
-        };
-
-        xhr.onload = () => {
-          if (xhr.status === 200) {
-            const res = JSON.parse(xhr.responseText);
-            push(ref(db, `galeria/${categoria}`), res.secure_url);
-            loadImages();
-          } else {
-            alert("Erro ao enviar imagem");
-          }
-        };
-
-        xhr.onerror = () => alert("Erro ao enviar imagem");
-        xhr.send(formData);
-      });
-
-      fileInput.value = "";
-    });
-
-    function loadImages() {
-      const categoria = categorySelect.value;
-      const galleryRef = ref(db, `galeria/${categoria}`);
-
-      onValue(galleryRef, snapshot => {
-        gallery.innerHTML = "";
-        const data = snapshot.val();
-        if (data) {
-          Object.entries(data).forEach(([key, url]) => {
-            const container = document.createElement("div");
-            container.className = "relative group overflow-hidden rounded shadow-md zoom-hover fade-in theme-card";
-
-            const img = document.createElement("img");
-            img.src = url;
-            img.className = "w-full h-auto";
-
-            const btn = document.createElement("button");
-            btn.textContent = "Remover";
-            btn.className = "absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-sm rounded hidden group-hover:block";
-            btn.onclick = () => remove(ref(db, `galeria/${categoria}/` + key));
-
-            container.appendChild(img);
-            container.appendChild(btn);
-            gallery.appendChild(container);
-          });
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = (e.loaded / e.total) * 100;
+          progressFill.style.width = `${percent}%`;
         }
-      });
-    }
+      };
 
-    const toggleThemeBtn = document.getElementById("toggleTheme");
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const res = JSON.parse(xhr.responseText);
+          push(ref(db, `galeria/${categoria}`), res.secure_url);
+          loadImages();
+        } else {
+          alert("Erro ao enviar imagem");
+        }
+      };
 
-    function applyTheme(theme) {
-      document.documentElement.setAttribute("data-theme", theme);
-      localStorage.setItem("theme", theme);
-      toggleThemeBtn.textContent = theme === "dark" ? "☀️" : "🌙";
-    }
+      xhr.onerror = () => alert("Erro ao enviar imagem");
+      xhr.send(formData);
+    });
 
-    const savedTheme = localStorage.getItem("theme") || "light";
-    applyTheme(savedTheme);
+    fileInput.value = "";
+  });
 
-    toggleThemeBtn.onclick = () => {
-      const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-      applyTheme(newTheme);
-    };
+  function loadImages() {
+    const categoria = categorySelect.value;
+    const galleryRef = ref(db, `galeria/${categoria}`);
 
-  </script>
+    onValue(galleryRef, snapshot => {
+      gallery.innerHTML = "";
+      const data = snapshot.val();
+      if (data) {
+        Object.entries(data).forEach(([key, url]) => {
+          const container = document.createElement("div");
+          container.className = "relative group overflow-hidden rounded shadow-md zoom-hover fade-in theme-card";
+
+          const img = document.createElement("img");
+          img.src = url;
+          img.className = "w-full h-auto";
+
+          const btn = document.createElement("button");
+          btn.textContent = "Remover";
+          btn.className = "absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-sm rounded hidden group-hover:block";
+          btn.onclick = () => remove(ref(db, `galeria/${categoria}/` + key));
+
+          container.appendChild(img);
+          container.appendChild(btn);
+          gallery.appendChild(container);
+        });
+      }
+    });
+  }
+
+  const toggleThemeBtn = document.getElementById("toggleTheme");
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+    toggleThemeBtn.textContent = theme === "dark" ? "☀️" : "🌙";
+  }
+
+  const savedTheme = localStorage.getItem("theme") || "light";
+  applyTheme(savedTheme);
+
+  toggleThemeBtn.onclick = () => {
+    const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    applyTheme(newTheme);
+  };
+</script>
+
 </body>
 </html>
