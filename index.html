@@ -220,12 +220,12 @@
       }
     });
 
-    categorySelect.innerHTML = 
+    categorySelect.innerHTML = `
       <option value="geral">Geral</option>
       <option value="viagem">Viagem</option>
       <option value="familia">Família</option>
       <option value="pets">Pets</option>
-    ;
+    `;
 
     categorySelect.onchange = loadImages;
 
@@ -276,19 +276,19 @@
         preview.appendChild(container);
 
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", https://api.cloudinary.com/v1_1/${cloudName}/upload, true);
+        xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloudName}/upload`, true);
 
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
             const percent = (e.loaded / e.total) * 100;
-            progressFill.style.width = ${percent}%;
+            progressFill.style.width = `${percent}%`;
           }
         };
 
         xhr.onload = () => {
           if (xhr.status === 200) {
             const res = JSON.parse(xhr.responseText);
-            push(ref(db, galeria/${categoria}), res.secure_url);
+            push(ref(db, `galeria/${categoria}`), res.secure_url);
             loadImages();
           } else {
             alert("Erro ao enviar imagem");
@@ -304,7 +304,7 @@
 
     function loadImages() {
       const categoria = categorySelect.value;
-      const galleryRef = ref(db, galeria/${categoria});
+      const galleryRef = ref(db, `galeria/${categoria}`);
 
       onValue(galleryRef, snapshot => {
         gallery.innerHTML = "";
@@ -321,7 +321,7 @@
             const btn = document.createElement("button");
             btn.textContent = "Remover";
             btn.className = "absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-sm rounded hidden group-hover:block";
-            btn.onclick = () => remove(ref(db, galeria/${categoria}/ + key));
+            btn.onclick = () => remove(ref(db, `galeria/${categoria}/` + key));
 
             container.appendChild(img);
             container.appendChild(btn);
