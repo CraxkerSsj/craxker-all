@@ -22,69 +22,56 @@
       --card-bg-light: #fff;
       --card-bg-dark: #2b2b2b;
     }
-
     html[data-theme="light"] {
       background-color: var(--bg-light);
       color: var(--text-light);
     }
-
     html[data-theme="dark"] {
       background-color: var(--bg-dark);
       color: var(--text-dark);
     }
-
     body {
       background-color: inherit;
       color: inherit;
       transition: background-color 0.4s, color 0.4s;
     }
-
     input, select {
       background-color: var(--input-bg-light);
       color: var(--text-light);
     }
-
     html[data-theme="dark"] input,
     html[data-theme="dark"] select {
       background-color: var(--input-bg-dark);
       color: var(--text-dark);
       border-color: #555;
     }
-
     .theme-card {
       background-color: var(--card-bg-light);
       color: var(--text-light);
     }
-
     html[data-theme="dark"] .theme-card {
       background-color: var(--card-bg-dark);
       color: var(--text-dark);
     }
-
     .theme-btn {
       background-color: var(--btn-bg-light);
       color: var(--btn-text-light);
     }
-
     html[data-theme="dark"] .theme-btn {
       background-color: var(--btn-bg-dark);
       color: var(--btn-text-dark);
     }
-
     .fade-in {
       animation: fadeIn 0.6s ease-in-out;
     }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     .zoom-hover:hover {
       transform: scale(1.05);
       transition: transform 0.3s ease;
     }
-
     .progress-bar {
       height: 6px;
       background-color: #a35eff;
@@ -92,21 +79,18 @@
       overflow: hidden;
       margin-top: 4px;
     }
-
     .progress-fill {
       height: 100%;
       background-color: #fff;
       width: 0%;
       transition: width 0.3s ease;
     }
-
     .preview-container {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       margin-bottom: 10px;
     }
-
     .preview-container img {
       height: 100px;
       border-radius: 8px;
@@ -116,50 +100,37 @@
   </style>
 </head>
 <body class="font-sans">
-
   <div class="absolute top-4 right-4 z-50">
-    <button id="toggleTheme" class="theme-btn px-3 py-1 rounded shadow hover:opacity-90 transition">
-      🌙
-    </button>
+    <button id="toggleTheme" class="theme-btn px-3 py-1 rounded shadow hover:opacity-90 transition">🌙</button>
   </div>
-
   <div class="min-h-screen flex items-center justify-center fade-in" id="authContainer">
     <div class="theme-card p-8 rounded-2xl shadow-xl w-full max-w-sm">
       <h2 class="text-2xl font-bold text-center mb-6">💖 Bem-vindos à Galeria 💖</h2>
       <div class="mb-4">
         <label class="block text-sm font-medium mb-1">Email</label>
-        <input type="email" id="email" placeholder="seu@email.com"
-          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 transition" />
+        <input type="email" id="email" placeholder="seu@email.com" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 transition" />
       </div>
       <div class="mb-6">
         <label class="block text-sm font-medium mb-1">Senha</label>
-        <input type="password" id="password" placeholder="********"
-          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 transition" />
+        <input type="password" id="password" placeholder="********" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 transition" />
       </div>
       <div>
-        <button id="loginBtn" class="theme-btn font-medium px-4 py-2 rounded-lg transition w-full">
-          Entrar
-        </button>
+        <button id="loginBtn" class="theme-btn font-medium px-4 py-2 rounded-lg transition w-full">Entrar</button>
         <p class="text-sm text-center mt-4">
           <a href="reset.html" class="text-blue-500 hover:underline">Esqueci minha senha</a>
         </p>
       </div>
     </div>
   </div>
-
   <div class="max-w-4xl mx-auto p-4 hidden" id="mainContent">
-
     <!-- Player de Música -->
     <div class="mb-4 text-center">
-      <button id="playMusicBtn" class="bg-pink-500 text-white px-4 py-2 rounded-lg shadow hover:bg-pink-600 transition">
-        🎵 Tocar Música
-      </button>
+      <button id="playMusicBtn" class="bg-pink-500 text-white px-4 py-2 rounded-lg shadow hover:bg-pink-600 transition">🎵 Tocar Música</button>
       <audio id="bgMusic" loop>
         <source src="lo-fi.mp3" type="audio/mpeg" />
         Seu navegador não suporta áudio.
       </audio>
     </div>
-
     <div class="flex justify-between items-center mb-4">
       <div>
         <label for="categorySelect" class="mr-2">Categoria:</label>
@@ -167,19 +138,15 @@
       </div>
       <button id="logoutBtn" class="theme-btn px-3 py-1 rounded hover:opacity-90">Sair</button>
     </div>
-
     <h1 class="text-3xl font-bold mb-2 text-center fade-in">Oie, amor 💖</h1>
     <p class="text-center mb-6 fade-in">Nossa galeria de fotos</p>
-
     <div class="flex flex-col items-center gap-2 mb-4 fade-in">
       <input type="file" id="fileInput" accept="image/*" multiple class="mb-2" />
       <div id="preview" class="preview-container"></div>
       <button id="uploadButton" class="theme-btn px-4 py-2 rounded transition">Enviar Fotos</button>
     </div>
-
     <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
   </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
@@ -284,9 +251,7 @@
       const files = fileInput.files;
       if (!files.length) return;
       const categoria = categorySelect.value;
-
       preview.innerHTML = "";
-
       [...files].forEach(file => {
         const formData = new FormData();
         formData.append("file", file);
@@ -333,7 +298,6 @@
         xhr.onerror = () => alert("Erro ao enviar imagem");
         xhr.send(formData);
       });
-
       fileInput.value = "";
     });
 
@@ -382,6 +346,5 @@
       applyTheme(newTheme);
     };
   </script>
-
 </body>
 </html>
