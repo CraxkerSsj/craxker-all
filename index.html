@@ -148,18 +148,6 @@
   </div>
 
   <div class="max-w-4xl mx-auto p-4 hidden" id="mainContent">
-    
-        <!-- Player de Música -->
-    <div class="mb-4 text-center">
-      <button id="playMusicBtn" class="bg-pink-500 text-white px-4 py-2 rounded-lg shadow hover:bg-pink-600 transition">
-        🎵 Tocar Música
-      </button>
-      <audio id="bgMusic" loop>
-        <source src="lo-fi.weba" type="audio/mpeg">
-        Seu navegador não suporta áudio.
-      </audio>
-    </div>
-    
     <div class="flex justify-between items-center mb-4">
       <div>
         <label for="categorySelect" class="mr-2">Categoria:</label>
@@ -358,29 +346,6 @@
       const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
       applyTheme(newTheme);
     };
-
-    const playMusicBtn = document.getElementById("playMusicBtn");
-    const bgMusic = document.getElementById("bgMusic");
-
-    playMusicBtn?.addEventListener("click", () => {
-      bgMusic.play();
-      playMusicBtn.textContent = "🔊 Música Tocando...";
-      playMusicBtn.disabled = true;
-    });
-
-    // Reproduzir música automaticamente ao mostrar a galeria
-    const mainContent = document.getElementById("mainContent");
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.target.style.display !== "none") {
-          bgMusic.play();
-          playMusicBtn.textContent = "🔊 Música Tocando...";
-          playMusicBtn.disabled = true;
-        }
-      });
-    });
-
-    observer.observe(mainContent, { attributes: true, attributeFilter: ['style'] });
   </script>
 </body>
 </html>
