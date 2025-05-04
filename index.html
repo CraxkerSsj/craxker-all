@@ -217,6 +217,31 @@
         .catch(err => alert("Erro ao entrar: " + err.message));
     };
 
+
+    const playMusicBtn = document.getElementById("playMusicBtn");
+    const bgMusic = document.getElementById("bgMusic");
+
+    playMusicBtn?.addEventListener("click", () => {
+      bgMusic.play();
+      playMusicBtn.textContent = "🔊 Música Tocando...";
+      playMusicBtn.disabled = true;
+    });
+
+    // Reproduzir música automaticamente ao mostrar a galeria
+    const mainContent = document.getElementById("mainContent");
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.target.style.display !== "none") {
+          bgMusic.play();
+          playMusicBtn.textContent = "🔊 Música Tocando...";
+          playMusicBtn.disabled = true;
+        }
+      });
+    });
+
+    
+    observer.observe(mainContent, { attributes: true, attributeFilter: ['style'] });
+
     logoutBtn.onclick = () => {
       signOut(auth).catch(err => alert("Erro ao sair: " + err.message));
     };
@@ -359,29 +384,6 @@
       applyTheme(newTheme);
     };
 
-    
-    const playMusicBtn = document.getElementById("playMusicBtn");
-    const bgMusic = document.getElementById("bgMusic");
-
-    playMusicBtn?.addEventListener("click", () => {
-      bgMusic.play();
-      playMusicBtn.textContent = "🔊 Música Tocando...";
-      playMusicBtn.disabled = true;
-    });
-
-    // Reproduzir música automaticamente ao mostrar a galeria
-    const mainContent = document.getElementById("mainContent");
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.target.style.display !== "none") {
-          bgMusic.play();
-          playMusicBtn.textContent = "🔊 Música Tocando...";
-          playMusicBtn.disabled = true;
-        }
-      });
-    });
-
-    observer.observe(mainContent, { attributes: true, attributeFilter: ['style'] });
   </script>
 </body>
 </html>
